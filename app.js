@@ -1,5 +1,5 @@
 // ATENÇÃO: COLE A URL DA SUA IMPLANTAÇÃO DO APPS SCRIPT ENTRE AS ASPAS ABAIXO:
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyJCopHVJpgjcq2AXARPom8fpkR79UclofIK8dZp7y4I-3NyYb1pEVG4NXIGZM7V3dgBQ/exec";
+const WEB_APP_URL = "SUA_URL_DO_APPS_SCRIPT_AQUI";
 
 // Estados globais do App local
 let currentUser = JSON.parse(localStorage.getItem('social_user')) || null;
@@ -29,6 +29,7 @@ loginForm.addEventListener('submit', async (e) => {
     const username = document.getElementById('login-username').value.trim().toLowerCase().replace('@', '');
     const email = document.getElementById('login-email').value.trim();
     const bio = document.getElementById('login-bio').value.trim();
+    const avatarUrl = document.getElementById('login-avatar').value.trim(); // Nova captura da foto de perfil
 
     if (!username || !email) return alert("Preencha o nome de usuário e e-mail!");
 
@@ -37,11 +38,10 @@ loginForm.addEventListener('submit', async (e) => {
     btn.innerText = "Conectando ao Sheets...";
 
     try {
-        // Enviar como text/plain remove a necessidade de requisições OPTIONS (CORS Preflight)
         const response = await fetch(WEB_APP_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'text/plain' },
-            body: JSON.stringify({ action: 'register', username, email, bio })
+            body: JSON.stringify({ action: 'register', username, email, bio, avatarUrl }) // Enviando a URL do avatar
         });
         
         const result = await response.json();
@@ -81,13 +81,15 @@ navButtons.forEach(btn => {
         const target = btn.getAttribute('data-target');
         document.getElementById(target).classList.remove('hidden');
 
-        // Limpa updates em segundo plano antigos para economizar cota do Sheets
+        // Limpa updates em segundo plano antigos
         clearInterval(dmsPolling);
         clearInterval(feedPolling);
         
         if (target === 'feed-subview') {
             loadFeed();
-            feedPolling = setInterval(loadFeed, 8000); // Atualiza feed global a cada 8s
+            feedPolling = setInterval(loadFeed, 8000); 
+        } else if (target === 'explore-subview') {
+            loadExplore(); // Carrega a nova aba Explorar
         } else if (target === 'dms-subview') {
             loadUsersForDMs();
         } else if (target === 'profile-subview') {
@@ -105,16 +107,19 @@ function showApp() {
     loginView.classList.add('hidden');
     appView.classList.remove('hidden');
     document.getElementById('user-display-name').innerText = `@${currentUser.username}`;
-    // Ativa aba padrão
     document.querySelector('[data-target="feed-subview"]').click();
 }
 
 // ================= SISTEMA DE FEED =================
 
 document.getElementById('submit-post-btn').addEventListener('click', async () => {
-    const input = document.getElementById('post-content');
-    const content = input.value.trim();
-    if (!content) return;
+    const inputContent = document.getElementById('post-content');
+    const inputImage = document.getElementById('post-image-url');
+    
+    const content = inputContent.value.trim();
+    const imageUrl = inputImage.value.trim(); // Nova captura da imagem do post
+
+    if (!content && !imageUrl) return; // Permite postar se houver apenas texto ou apenas imagem
 
     const btn = document.getElementById('submit-post-btn');
     btn.disabled = true;
@@ -123,11 +128,12 @@ document.getElementById('submit-post-btn').addEventListener('click', async () =>
         const response = await fetch(WEB_APP_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'text/plain' },
-            body: JSON.stringify({ action: 'createPost', userId: currentUser.id, content })
+            body: JSON.stringify({ action: 'createPost', userId: currentUser.id, content, imageUrl }) // Enviando a imagem
         });
         const result = await response.json();
         if (result.success) {
-            input.value = '';
+            inputContent.value = '';
+            inputImage.value = ''; // Limpa o campo da imagem
             loadFeed();
         }
     } catch (error) {
@@ -152,12 +158,50 @@ async function loadFeed() {
         posts.forEach(post => {
             const card = document.createElement('div');
             card.className = 'post-card';
+            
+            // Verifica se tem avatar, se não tiver coloca um genérico
+            const avatarSrc = post.userAvatar ? post.userAvatar : 'https://via.placeholder.com/40/334155/f8fafc?text=User';
+            // Verifica se tem imagem anexada no post
+            const imageTag = post.imageUrl ? `<img src="${post.imageUrl}" class="post-attached-image" alt="Imagem do post">` : '';
+
             card.innerHTML = `
                 <div class="post-header">
-                    <span class="post-user">@${post.username}</span>
-                    <span>${new Date(post.date).toLocaleDateString('pt-BR')}</span>
+                    <img src="${avatarSrc}" class="avatar-img" alt="Avatar">
+                    <div class="post-header-info">
+                        <span class="post-user">@${post.username}</span>
+                        <span class="post-date">${new Date(post.date).toLocaleDateString('pt-BR')}</span>
+                    </div>
                 </div>
                 <div class="post-content">${cleanXSS(post.content)}</div>
+                ${imageTag}
+            `;
+            container.appendChild(card);
+        });
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+// ================= SISTEMA DE EXPLORAR =================
+
+async function loadExplore() {
+    try {
+        const response = await fetch(`${WEB_APP_URL}?action=getExplore`);
+        const posts = await response.json();
+        const container = document.getElementById('explore-container');
+        container.innerHTML = '';
+
+        if(posts.length === 0) {
+            container.innerHTML = '<p style="color:var(--text-secondary);">Nenhuma imagem encontrada na rede ainda.</p>';
+            return;
+        }
+
+        posts.forEach(post => {
+            const card = document.createElement('div');
+            card.className = 'explore-item';
+            card.innerHTML = `
+                <img src="${post.imageUrl}" alt="Explore Image">
+                <div class="explore-item-info">@${post.username}</div>
             `;
             container.appendChild(card);
         });
@@ -178,7 +222,6 @@ async function loadMyProfile() {
         const container = document.getElementById('my-posts-container');
         container.innerHTML = '';
 
-        // Filtra apenas os posts criados pelo ID logado
         const myPosts = posts.filter(p => p.userId === currentUser.id);
 
         if(myPosts.length === 0) {
@@ -189,12 +232,20 @@ async function loadMyProfile() {
         myPosts.forEach(post => {
             const card = document.createElement('div');
             card.className = 'post-card';
+            
+            const avatarSrc = post.userAvatar ? post.userAvatar : 'https://via.placeholder.com/40/334155/f8fafc?text=User';
+            const imageTag = post.imageUrl ? `<img src="${post.imageUrl}" class="post-attached-image" alt="Imagem do post">` : '';
+
             card.innerHTML = `
                 <div class="post-header">
-                    <span class="post-user">@${post.username}</span>
-                    <span>${new Date(post.date).toLocaleDateString('pt-BR')}</span>
+                    <img src="${avatarSrc}" class="avatar-img" alt="Avatar">
+                    <div class="post-header-info">
+                        <span class="post-user">@${post.username}</span>
+                        <span class="post-date">${new Date(post.date).toLocaleDateString('pt-BR')}</span>
+                    </div>
                 </div>
                 <div class="post-content">${cleanXSS(post.content)}</div>
+                ${imageTag}
             `;
             container.appendChild(card);
         });
@@ -212,7 +263,6 @@ async function loadUsersForDMs() {
         const listContainer = document.getElementById('dms-users-list');
         listContainer.innerHTML = '';
 
-        // Esconde você mesmo da lista de usuários ativos
         const externalUsers = users.filter(u => u.id !== currentUser.id);
 
         if(externalUsers.length === 0) {
@@ -243,7 +293,7 @@ function startChatWith(user) {
 
     clearInterval(dmsPolling);
     fetchMessages();
-    dmsPolling = setInterval(fetchMessages, 4000); // Baixa mensagens novas a cada 4 segundos
+    dmsPolling = setInterval(fetchMessages, 4000);
 }
 
 async function fetchMessages() {
@@ -261,7 +311,6 @@ async function fetchMessages() {
             bubble.innerText = msg.message;
             container.appendChild(bubble);
         });
-        // Auto-scroll automático na última mensagem
         container.scrollTop = container.scrollHeight;
     } catch (error) {
         console.error(error);
