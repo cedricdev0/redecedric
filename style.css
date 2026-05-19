@@ -125,3 +125,51 @@ button:hover { background-color: var(--brand-hover); color: #fff; }
 /* PERFIL */
 .profile-header-card { background-color: var(--bg-secondary); padding: 1.75rem; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 2rem; }
 .profile-header-card h2 { border: none; padding: 0; margin-bottom: 0.5rem; color: var(--brand-color); }
+
+/* FOTOS DE PERFIL */
+.avatar-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 10px;
+    background-color: var(--border-color);
+}
+.post-header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+}
+.post-header-info { display: flex; flex-direction: column; }
+.post-date { font-size: 0.75rem; color: var(--text-secondary); }
+
+/* IMAGENS NOS POSTS */
+.post-attached-image {
+    max-width: 100%;
+    border-radius: 8px;
+    margin-top: 10px;
+    border: 1px solid var(--border-color);
+}
+
+/* ABA EXPLORAR (GRID) */
+.explore-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+}
+.explore-item {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+.explore-item:hover { transform: scale(1.02); border-color: var(--brand-color); }
+.explore-item img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+.explore-item-info { padding: 10px; font-size: 0.85rem; font-weight: bold; }
