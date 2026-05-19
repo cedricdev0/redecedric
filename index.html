@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minha Rede Social - MVP</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="login-view" class="view">
+        <div class="login-box">
+            <h2>Rede Social Indie</h2>
+            <p>Entre com seu username ou cadastre-se na hora!</p>
+            <form id="login-form">
+                <input type="text" id="login-username" placeholder="Nome de usuário (Ex: dev_indie)" required>
+                <input type="email" id="login-email" placeholder="Seu e-mail" required>
+                <textarea id="login-bio" placeholder="Escreva algo sobre você (Sua bio)..."></textarea>
+                <button type="submit">Entrar / Registrar</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="app-view" class="view hidden">
+        <aside class="sidebar">
+            <div class="profile-summary">
+                <h3 id="user-display-name">@carregando</h3>
+            </div>
+            <nav class="nav-menu">
+                <button class="nav-btn active" data-target="feed-subview">🏠 Feed Principal</button>
+                <button class="nav-btn" data-target="dms-subview">💬 Mensagens (DMs)</button>
+                <button class="nav-btn" data-target="profile-subview">👤 Meu Perfil</button>
+            </nav>
+            <button id="logout-btn" class="logout-btn">Sair da Conta</button>
+        </aside>
+
+        <main class="main-content">
+            <section id="feed-subview" class="subview">
+                <h2>Feed Global</h2>
+                <div class="create-post-box">
+                    <textarea id="post-content" placeholder="O que você está pensando agora?" maxlength="280" required></textarea>
+                    <button id="submit-post-btn">Publicar Post</button>
+                </div>
+                <div id="posts-container" class="posts-list"></div>
+            </section>
+
+            <section id="dms-subview" class="subview hidden">
+                <h2>Minhas Conversas</h2>
+                <div class="dms-layout">
+                    <div class="users-list-pane">
+                        <h3>Membros</h3>
+                        <div id="dms-users-list"></div>
+                    </div>
+                    <div class="chat-pane">
+                        <div id="chat-header">Selecione um usuário para conversar</div>
+                        <div id="chat-messages" class="chat-messages-box"></div>
+                        <div id="chat-input-box" class="chat-input-area hidden">
+                            <input type="text" id="dm-message-input" placeholder="Digite sua mensagem direta...">
+                            <button id="send-dm-btn">Enviar</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="profile-subview" class="subview hidden">
+                <div class="profile-header-card">
+                    <h2 id="profile-name">@username</h2>
+                    <p id="profile-bio">Sua bio carregando...</p>
+                </div>
+                <h3>Minhas Publicações</h3>
+                <div id="my-posts-container" class="posts-list"></div>
+            </section>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
