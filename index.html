@@ -16,6 +16,7 @@
                 <input type="text" id="login-username" placeholder="Nome de usuário (Ex: dev_indie)" required>
                 <input type="email" id="login-email" placeholder="Seu e-mail" required>
                 <textarea id="login-bio" placeholder="Escreva algo sobre você (Sua bio)..."></textarea>
+                <input type="url" id="login-avatar" placeholder="Link da sua Foto de Perfil (Opcional)">
                 <button type="submit">Entrar / Registrar</button>
             </form>
         </div>
@@ -27,6 +28,7 @@
                 <h3 id="user-display-name">@carregando</h3>
             </div>
             <nav class="nav-menu">
+                <button class="nav-btn" data-target="explore-subview">🌍 Explorar</button>
                 <button class="nav-btn active" data-target="feed-subview">🏠 Feed Principal</button>
                 <button class="nav-btn" data-target="dms-subview">💬 Mensagens (DMs)</button>
                 <button class="nav-btn" data-target="profile-subview">👤 Meu Perfil</button>
@@ -35,9 +37,15 @@
         </aside>
 
         <main class="main-content">
+            <section id="explore-subview" class="subview hidden">
+                <h2>Explorar Galeria</h2>
+                <p style="color:var(--text-secondary); margin-bottom: 1rem;">Descubra as fotos que a galera está postando!</p>
+                <div id="explore-container" class="explore-grid"></div>
+            </section>
             <section id="feed-subview" class="subview">
                 <h2>Feed Global</h2>
                 <div class="create-post-box">
+                    <input type="url" id="post-image-url" placeholder="Coloque o link de uma imagem para o post (Opcional)">
                     <textarea id="post-content" placeholder="O que você está pensando agora?" maxlength="280" required></textarea>
                     <button id="submit-post-btn">Publicar Post</button>
                 </div>
