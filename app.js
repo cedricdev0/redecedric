@@ -1,5 +1,5 @@
 // ATENÇÃO: COLE A URL DA SUA IMPLANTAÇÃO DO APPS SCRIPT ENTRE AS ASPAS ABAIXO:
-const WEB_APP_URL = "SUA_URL_DO_APPS_SCRIPT_AQUI";
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwBHdLU6fq_ihbhLNl8uiNDe5W0syu3FPPu8vRTmupKRfQwbfEbmA7TW86fm8Syqww3tw/exec";
 
 // Estados globais do App local
 let currentUser = JSON.parse(localStorage.getItem('social_user')) || null;
