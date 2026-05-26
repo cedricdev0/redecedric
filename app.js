@@ -41,10 +41,15 @@ loginForm.addEventListener('submit', async (e) => {
         const response = await fetch(WEB_APP_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'text/plain' },
-            body: JSON.stringify({ action: 'register', username, email, bio, avatarUrl }) // Enviando a URL do avatar
+            body: JSON.stringify({ action: 'register', username, email, bio, avatarUrl })
         });
         
-        const result = await response.json();
+        // --- TRECHO DE DIAGNÓSTICO ---
+        const rawText = await response.text(); 
+        console.log("RESPOSTA BRUTA DO GOOGLE:", rawText);
+        
+        const result = JSON.parse(rawText);
+        // ------------------------------
         
         if (result.success && result.user) {
             currentUser = result.user;
@@ -55,7 +60,7 @@ loginForm.addEventListener('submit', async (e) => {
         }
     } catch (error) {
         console.error(error);
-        alert("Erro crítico de conexão com a API.");
+        alert("Abra o Console do Navegador (F12) para ver o erro real!");
     } finally {
         btn.disabled = false;
         btn.innerText = "Entrar / Registrar";
